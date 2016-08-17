@@ -1,0 +1,51 @@
+# vim:set sw=2 ts=2 et:
+# Don't use this to deploy the example, unless you're running a local
+# Kubernetes cluster.  It's only for testing.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: weaver-python-example
+spec:
+  selector:
+    app: weaver-python-example
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: weaver-ingress
+spec:
+  rules:
+  - host: weaver-python-example.weaver.torchboxapps.com
+    http:
+      paths:
+      - backend:
+          serviceName: weaver-python-example
+          servicePort: 80
+
+---
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: weaver-python-example
+spec:
+  replicas: 1
+  selector:
+    app: weaver-python-example
+  template:
+    metadata:
+      name: weaver-python-example
+      labels:
+        app: weaver-python-example
+    spec:
+      containers:
+      - name: weaver-python-example
+        image: docker.io/torchbox/weaver-python-example:latest
+        imagePullPolicy: Always
